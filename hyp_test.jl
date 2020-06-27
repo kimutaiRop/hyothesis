@@ -142,7 +142,7 @@ function chiSqIndep(arry)
     row_sum = sum(arry,dims=2)
     col_sum = sum(arry,dims=1)
     exp = row_sum*col_sum /sum(col_sum)
-    arr_s =hcat([arr...])
+    arr_s =hcat([arry...])
     exp_s =hcat([exp...])
     Χ² = sum((arr_s .- exp_s).^2 ./exp_s)
     df = (size(arry)[1]-1) * (size(arry)[2]-1)
@@ -198,7 +198,7 @@ end
 =#
 
 function KruskalWallis(arry)
-    sorted = sort([vcat(d)...])
+    sorted = sort([vcat(arry)...])
     indices = []
     for ind in 1:size(arry)[2]
         arr_index = finIndex(arry[:,ind],sorted)
