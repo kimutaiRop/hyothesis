@@ -58,6 +58,7 @@ function randomness(ser)
 end
 
 #= the argument passed should be an array if from dataframe, splice the column you want to an array eg:
+
     randomness([data.u...])
 =#
 
@@ -78,6 +79,7 @@ function wilcoxon(arry)
 end
 
 #= the argument passed should be an array (x,2). If from dataframe, splice each of the columns to an array eg:
+
     d = hcat([data[!,1]...] , [data[!,2]...])
     wilcoxon(d)
 =#
@@ -101,18 +103,14 @@ function finIndex(arr,joint...)
 end
 
 #mann-witney U test
-function rankJoint(col1, col2)
-    sorted = sort([col1...,col2...])
-    col1_ind = finIndex(col1,sorted)
-    col2_ind = finIndex(col2,sorted)
-    return (col1_ind,col2_ind)
-end
 
 function mannWitney(arry)
     #ranks the columns jointly
     col1 = arry[:,1]
     col2 = arry[:,2]
-    R₁,R₂ = rankJoint(col1, col2)
+    sorted = sort([col1...,col2...])
+    R₂ = finIndex(col1, sorted)
+    R₁ = finIndex(col2, sorted)
     sum_R₁ = sum(R₁)
     sum_R₂ = sum(R₂)
     n₁ = length(col2)
@@ -134,6 +132,7 @@ function mannWitney(arry)
 end
 
 #= the argument passed should be an array (x,2). If from dataframe, splice each of the columns to an array eg:
+
     d = hcat([data[!,1]...] , [data[!,2]...])
     mannWitney(d)
 =#
@@ -154,6 +153,7 @@ function chiSqIndep(arry)
 end
 
 #= this accepts any dimension array (x,y) you just pass in the array eg:
+
     arr = [170 150;120 110;160 90]
     chiSqIndep(arr)
 =#
@@ -163,7 +163,7 @@ function chiSqGoodness(args)
 end
 
 
-
+#spernameRank measure of correlation
 function spermanRank(arry)
     indices = []
     for ind in 1:size(arry)[2]
@@ -172,7 +172,7 @@ function spermanRank(arry)
             indices = [arr_index...]
         else
             indices = hcat(indices,[arr_index...])
-    end
+        end
     end
     Rₛ = [x/1 for x = 1:size(indices)[2]-1]
     for ind in 2:size(indices)[2]
@@ -192,6 +192,33 @@ end
 
 #for sperman, if you have several columns all the other columns will be tested agains the first and returned in order
 #= the argument passed should be an array (x,y). If from dataframe, splice each of the columns to an array eg:
+
     d = hcat([data[!,1]...] , [data[!,2]...])
     spernameRank(d)
+=#
+
+function KruskalWallis(arry)
+    sorted = sort([vcat(d)...])
+    indices = []
+    for ind in 1:size(arry)[2]
+        arr_index = finIndex(arry[:,ind],sorted)
+        if ind == 1
+            indices = [arr_index...]
+        else
+            indices = hcat(indices,[arr_index...])
+        end
+    end
+    Rᵢ = sum(indices,dims=2)
+    n = sum(length.(arry),dims=1)
+    N = length(sorted)
+    H = 12/(N*(N-1)) * sum(Rᵢ.^2 ./ n) - 3*(N+1)
+    return H
+end
+
+#= if you have severa; columns, you will have to pass them in twos
+as of now, this accepts only columns with equal lengths eg
+
+d = hcat([data[1:50,1]...] , [data[1:50,2]...])
+KruskalWallis(d)
+
 =#
